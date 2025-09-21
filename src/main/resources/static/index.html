@@ -61,8 +61,7 @@
     
     <div class="message-form">
         <h3>Send a Message</h3>
-        <input type="text" id="sender" placeholder="Your name" value="User">
-        <input type="text" id="content" placeholder="Message content">
+        <input type="text" id="content" placeholder="Enter your message">
         <button onclick="sendMessage()">Send Message</button>
     </div>
     
@@ -94,15 +93,15 @@
         }
 
         // Add message to UI
-        function addMessageToUI(message) {
+        function addMessageToUI(messageData) {
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message';
             
-            const timestamp = new Date(message.timestamp).toLocaleString();
+            const timestamp = new Date().toLocaleString();
             
             messageDiv.innerHTML = `
-                <div class="message-header">${message.sender}</div>
-                <div>${message.content}</div>
+                <div class="message-header">Message</div>
+                <div>${messageData.message}</div>
                 <div class="message-time">${timestamp}</div>
             `;
             
@@ -112,7 +111,6 @@
 
         // Send message via POST
         function sendMessage() {
-            const sender = document.getElementById('sender').value;
             const content = document.getElementById('content').value;
             
             if (!content.trim()) {
@@ -126,8 +124,7 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    sender: sender,
-                    content: content
+                    message: content
                 })
             })
             .then(response => response.text())

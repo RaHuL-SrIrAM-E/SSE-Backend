@@ -1,11 +1,12 @@
 package main.java.com.example.helloworld.controller;
 
-import main.java.com.example.helloworld.model.Message;
 import main.java.com.example.helloworld.service.SSEService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -27,35 +28,26 @@ public class HelloController {
     // POST endpoint to send messages
     @PostMapping("/messages")
     public String sendMessage(@RequestBody MessageRequest request) {
-        sseService.sendMessage(request.getContent(), request.getSender());
+        sseService.sendMessage(request.getMessage());
         return "Message sent successfully";
     }
 
     // GET endpoint for SSE stream
     @GetMapping(value = "/messages/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<Message> streamMessages() {
+    public Flux<Map<String, String>> streamMessages() {
         return sseService.getMessageStream();
     }
 
     // Request DTO for message creation
     public static class MessageRequest {
-        private String content;
-        private String sender;
+        private String message;
 
-        public String getContent() {
-            return content;
+        public String getMessage() {
+            return message;
         }
 
-        public void setContent(String content) {
-            this.content = content;
-        }
-
-        public String getSender() {
-            return sender;
-        }
-
-        public void setSender(String sender) {
-            this.sender = sender;
+        public void setMessage(String message) {
+            this.message = message;
         }
     }
 }
