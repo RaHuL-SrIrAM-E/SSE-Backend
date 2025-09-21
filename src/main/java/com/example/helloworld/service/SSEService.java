@@ -1,4 +1,4 @@
-package main.java.com.example.helloworld.service;
+package com.example.helloworld.service;
 
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;

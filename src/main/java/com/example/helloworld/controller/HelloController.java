@@ -1,6 +1,6 @@
-package main.java.com.example.helloworld.controller;
+package com.example.helloworld.controller;
 
-import main.java.com.example.helloworld.service.SSEService;
+import com.example.helloworld.service.SSEService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +10,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class HelloController {
 
     @Autowired
