@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSE Message Stream</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .message-form {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .message-form input, .message-form button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .message-form button {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        .message-form button:hover {
+            background: #0056b3;
+        }
+        .messages {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            height: 400px;
+            overflow-y: auto;
+        }
+        .message {
+            background: #e9ecef;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        .message-header {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .message-time {
+            font-size: 0.8em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>SSE Message Stream</h1>
+    
+    <div class="message-form">
+        <h3>Send a Message</h3>
+        <input type="text" id="sender" placeholder="Your name" value="User">
+        <input type="text" id="content" placeholder="Message content">
+        <button onclick="sendMessage()">Send Message</button>
+    </div>
+    
+    <div class="messages" id="messages">
+        <p>Connecting to message stream...</p>
+    </div>
+
+    <script>
+        const messagesDiv = document.getElementById('messages');
+        let eventSource;
+
+        // Connect to SSE stream
+        function connectToStream() {
+            eventSource = new EventSource('/api/messages/stream');
+            
+            eventSource.onmessage = function(event) {
+                const message = JSON.parse(event.data);
+                addMessageToUI(message);
+            };
+            
+            eventSource.onerror = function(event) {
+                console.error('SSE error:', event);
+                addMessageToUI({
+                    content: 'Connection error. Retrying...',
+                    sender: 'System',
+                    timestamp: new Date().toISOString()
+                });
+            };
+        }
+
+        // Add message to UI
+        function addMessageToUI(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            
+            const timestamp = new Date(message.timestamp).toLocaleString();
+            
+            messageDiv.innerHTML = `
+                <div class="message-header">${message.sender}</div>
+                <div>${message.content}</div>
+                <div class="message-time">${timestamp}</div>
+            `;
+            
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Send message via POST
+        function sendMessage() {
+            const sender = document.getElementById('sender').value;
+            const content = document.getElementById('content').value;
+            
+            if (!content.trim()) {
+                alert('Please enter a message');
+                return;
+            }
+            
+            fetch('/api/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    sender: sender,
+                    content: content
+                })
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log('Message sent:', data);
+                document.getElementById('content').value = '';
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+                alert('Error sending message');
+            });
+        }
+
+        // Allow Enter key to send message
+        document.getElementById('content').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Connect when page loads
+        connectToStream();
+    </script>
+</body>
+</html>
